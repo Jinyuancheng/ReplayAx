@@ -59,7 +59,7 @@ namespace ReplayAx.Video
         private CHCNetSDK.MSGCallBack_V31 m_MsgCallbackHik; //回调函数
         private List<CLoginInfo> m_lstLoginInfo;   //用来存储登录信息
         private object m_oSingleLock;    //线程锁
-        private Thread m_oThread;        //开启子线程用来做海康摄像机登录操作
+        //private Thread m_oThread;        //开启子线程用来做海康摄像机登录操作
 
         private bool m_bIsFirstFloder;  //是否是第一次文件夹（配置文件中没有抓拍文件的路径）
         private List<NET_DVR_IPPARACFG_V40> m_lstStruIpParaCfgV40;//用来存储计算通道号的信息数据
@@ -160,8 +160,8 @@ namespace ReplayAx.Video
             m_MsgCallbackHik = new CHCNetSDK.MSGCallBack_V31(MsgCallbackHik);
             m_lstLoginInfo = new List<CLoginInfo>();
             m_oSingleLock = new object();
-            m_oThread = new Thread(ThreadLogin);
-            m_oThread.Start();
+            //m_oThread = new Thread(ThreadLogin);
+            //m_oThread.Start();
 
             //初始化读取配置文件的信息
             m_sCapPicPath = "";
@@ -312,6 +312,65 @@ namespace ReplayAx.Video
                 }
             }
         }
+        /// <summary>
+        /// 海康主机登录
+        /// </summary>
+        public void HikHostLogin()
+        {
+            if (m_lstLoginInfo.Count > 0)
+            {
+                for (int i = 0; i < m_lstLoginInfo.Count; i++)
+                {
+                    if (m_lstLoginInfo[i].iHandle == -1)
+                    {
+                        NET_DVR_USER_LOGIN_INFO struLoginInfo = new NET_DVR_USER_LOGIN_INFO();
+                        NET_DVR_DEVICEINFO_V40 devInfor = new NET_DVR_DEVICEINFO_V40();
+                        devInfor.byRes2 = new byte[246];
+                        devInfor.struDeviceV30.sSerialNumber = new byte[48];
+                        devInfor.byRes2 = new byte[246];
+                        devInfor.struDeviceV30.sSerialNumber = new byte[48];
+                        struLoginInfo.sDeviceAddress = m_lstLoginInfo[i].sStreamIp;
+                        struLoginInfo.wPort = Convert.ToUInt16(m_lstLoginInfo[i].sPort); //设备服务端口
+                        struLoginInfo.sUserName = m_lstLoginInfo[i].sUser; //设备登录用户名
+                        struLoginInfo.sPassword = m_lstLoginInfo[i].sPass; //设备登录密码
+                        struLoginInfo.bUseAsynLogin = false; //同步登录方式（异步现在设备不在线时会报错，不知道啥原因）
+                        struLoginInfo.byLoginMode = 0;
+                        struLoginInfo.byHttps = 2;
+                        //m_lstLoginInfo[i].iHandle = HikVideoAPI.NET_HIK_Login_V40(ref struLoginInfo, ref devInfor);
+                        m_lstLoginInfo[i].iHandle = CHCNetSDK.NET_DVR_Login_V40(ref struLoginInfo, ref devInfor);
+                        //失败
+                        if (m_lstLoginInfo[i].iHandle < 0)
+                        {
+                            CHCNetSDK.NET_DVR_Logout(m_lstLoginInfo[i].iHandle);
+                            CHCNetSDK.NET_DVR_Cleanup();
+                            return;
+                        }
+                        else
+                        {
+                            //存储数据用来计算通道号
+                            NET_DVR_IPPARACFG_V40 oIpParaCfgV40 = new NET_DVR_IPPARACFG_V40();
+                            uint dwSize = (uint)Marshal.SizeOf(oIpParaCfgV40);
+                            IntPtr ptrIpParaCfgV40 = Marshal.AllocHGlobal((Int32)dwSize);
+                            Marshal.StructureToPtr(oIpParaCfgV40, ptrIpParaCfgV40, false);
+                            uint dwReturn = 0;
+                            //int iGroupNo = 0; //该Demo仅获取第一组64个通道，如果设备IP通道大于64路，需要按组号0~i多次调用NET_DVR_GET_IPPARACFG_V40获取
+                            for (int iGroupNo = 0; iGroupNo < 4; iGroupNo++)
+                            {
+                                if (CHCNetSDK.NET_DVR_GetDVRConfig(m_lstLoginInfo[i].iHandle, CHCNetSDK.NET_DVR_GET_IPPARACFG_V40, iGroupNo, ptrIpParaCfgV40, dwSize, ref dwReturn))
+                                {
+                                    oIpParaCfgV40 = (CHCNetSDK.NET_DVR_IPPARACFG_V40)Marshal.PtrToStructure(ptrIpParaCfgV40, typeof(CHCNetSDK.NET_DVR_IPPARACFG_V40));
+                                    m_lstStruIpParaCfgV40.Add(oIpParaCfgV40);
+                                }
+                            }
+                        }
+                        //第二种登录
+                        //CHCNetSDK.NET_DVR_DEVICEINFO_V30 DeviceInfo = new CHCNetSDK.NET_DVR_DEVICEINFO_V30();
+                        //m_lstLoginInfo[i].iHandle = CHCNetSDK.NET_DVR_Login_V30(m_lstLoginInfo[i].sIp, Convert.ToInt32(m_lstLoginInfo[i].sPort),
+                        //    m_lstLoginInfo[i].sUser, m_lstLoginInfo[i].sPass, ref DeviceInfo);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// 根据ip返回通道号(海康摄像机)
@@ -377,6 +436,7 @@ namespace ReplayAx.Video
                 oLoginInfo.sStreamIp = _sStreamIp;
                 m_lstLoginInfo.Add(oLoginInfo);
             }
+            HikHostLogin();
         }
         /// <summary>
         /// 初始化ActiveX
