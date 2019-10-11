@@ -33,7 +33,8 @@
             // 
             // ucSinglePanle
             // 
-            this.ucSinglePanle.BackgroundImage = global::ReplayAx.Properties.Resources.VideoBack;
+            this.ucSinglePanle.BackgroundImage = global::ReplayAx.Properties.Resources.img1;
+            this.ucSinglePanle.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ucSinglePanle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ucSinglePanle.Location = new System.Drawing.Point(0, 0);
             this.ucSinglePanle.Name = "ucSinglePanle";

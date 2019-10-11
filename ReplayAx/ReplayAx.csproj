@@ -75,6 +75,11 @@
     <Compile Include="IObjectSafety.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Video\fm_FullScreen.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -98,14 +103,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="Video\fm_FullScreen.resx">
       <DependentUpon>fm_FullScreen.cs</DependentUpon>
     </EmbeddedResource>
@@ -131,6 +131,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\VideoBack.png" />
+    <None Include="Resources\img.png" />
+    <None Include="Resources\img1.png" />
+    <None Include="Resources\fullimg1.png" />
     <Content Include="skin\VideoBack.png" />
     <Content Include="skin\VideoCap_0.png" />
     <Content Include="skin\VideoCap_1.png" />

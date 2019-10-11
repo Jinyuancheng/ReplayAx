@@ -33,7 +33,8 @@
             // 
             // PanelFull
             // 
-            this.PanelFull.BackgroundImage = global::ReplayAx.Properties.Resources.VideoBack;
+            this.PanelFull.BackgroundImage = global::ReplayAx.Properties.Resources.fullimg1;
+            this.PanelFull.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.PanelFull.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PanelFull.Location = new System.Drawing.Point(0, 0);
             this.PanelFull.Name = "PanelFull";
